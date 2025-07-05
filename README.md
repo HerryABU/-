@@ -107,5 +107,5 @@
 
 ---
 
-### ***借助；制作,官方链接https://www.aipyaipy.com/, TA的github：https://github.com/knownsec/aipyapp ；送tokens大礼包哦！***
+### ***借助AI制作,官方链接[https://www.aipyaipy.com/ ](https://www.aipyaipy.com/ )，TA的github：[https://github.com/knownsec/aipyapp ](https://github.com/knownsec/aipyapp )；<span style="color:red">送tokens大礼包哦！</span>***
 
