@@ -1,0 +1,34 @@
+name: Build Electron App
+
+on:
+  push:
+    tags:
+      - 'v*' # 当你推送类似 v1.0.0 的 tag 时触发
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Application
+        run: npm run dist:all
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: student-number-picker-${{ matrix.platform }}
+          path: dist/
