@@ -1,9 +1,9 @@
-name: Build Electron App
+name: Build and Publish Electron App
 
 on:
   push:
     tags:
-      - 'v*' # 当你推送类似 v1.0.0 的 tag 时触发
+      - 'v*'
 
 jobs:
   build:
@@ -11,6 +11,8 @@ jobs:
       matrix:
         platform: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
+    outputs:
+      release_id: ${{ steps.create_release.outputs.release_id }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -32,3 +34,66 @@ jobs:
         with:
           name: student-number-picker-${{ matrix.platform }}
           path: dist/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts (Windows)
+        uses: actions/download-artifact@v3
+        with:
+          name: student-number-picker-windows-latest
+          path: dist/windows
+
+      - name: Download Artifacts (Linux)
+        uses: actions/download-artifact@v3
+        with:
+          name: student-number-picker-ubuntu-latest
+          path: dist/linux
+
+      - name: Download Artifacts (macOS)
+        uses: actions/download-artifact@v3
+        with:
+          name: student-number-picker-macos-latest
+          path: dist/macos
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Assets to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/linux/学号抽取系统-*.AppImage
+          asset_name: 学号抽取系统-linux.AppImage
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Installer
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/windows/*.exe
+          asset_name: 学号抽取系统-win.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload macOS DMG
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/macos/*.dmg
+          asset_name: 学号抽取系统-mac.dmg
+          asset_content_type: application/octet-stream
